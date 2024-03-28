@@ -13,7 +13,7 @@
 source ~/.bashrc
 
 # The fastq input file directory.
-fastq_input_dir=""
+fastq_input_dir="/archive/dumonceauxt/230801_M01666_0203_000000000-KTT65_IMPACTTlilacBBSPTWMQhybsEPL/Fastq"
 
 # The read1 fastq suffix.
 read1_suffix="_R1.fastq"
