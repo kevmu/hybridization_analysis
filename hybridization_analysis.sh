@@ -27,12 +27,12 @@ fastq_file_ext=".fastq"
 num_threads=8
 
 # Emirge databases
-emirge_fasta_db="/home/AGR.GC.CA/muirheadk/hybridization_analysis/impactt_hybrid/emirge_db/silva_db/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref.fasta"
+emirge_fasta_db="/home/AGR.GC.CA/muirheadk/hybridization_analysis/emirge_db/silva_db/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref.fasta"
 
-emirge_bowtie_db="/home/AGR.GC.CA/muirheadk/hybridization_analysis/impactt_hybrid/emirge_db/silva_db/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref"
+emirge_bowtie_db="/home/AGR.GC.CA/muirheadk/hybridization_analysis/emirge_db/silva_db/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref"
 
 # The base output directory.
-output_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis/impactt_hybrid/tkg_pilot_test"
+output_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis/impactt_hybrid"
 mkdir -p $output_dir
 
 # The preprocessing output directory.

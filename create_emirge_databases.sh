@@ -10,9 +10,9 @@
 
 source ~/.bashrc
 
-db_dir="/home/kevin.muirhead/impactt_hybrid"
+db_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis"
 
-emirge_scripts_dir="/home/kevin.muirhead/impactt_hybrid/EMIRGE"
+emirge_scripts_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis/EMIRGE"
 
 # The emirge database directory.
 emirge_db_dir="${db_dir}/emirge_db"
@@ -53,10 +53,11 @@ if [ ! -s $silva_fixed_db_fasta ];
 then
 
 	# Fix the nonstandard characters in the silva database.
+	echo "python ${emirge_scripts_dir}/utils/fix_nonstandard_chars.py < ${silva_db_fasta} > ${silva_fixed_db_fasta}"
 	python ${emirge_scripts_dir}/utils/fix_nonstandard_chars.py < ${silva_db_fasta} > ${silva_fixed_db_fasta}
 else
-    silva_fixed_db_fasta_filename=$(basename $silva_fixed_db_fasta)
-    echo "The ${silva_fixed_db_fasta_filename} file has already been created. Skipping to next set of commands!!!"
+	silva_fixed_db_fasta_filename=$(basename $silva_fixed_db_fasta)
+	echo "The ${silva_fixed_db_fasta_filename} file has already been created. Skipping to next set of commands!!!"
 fi
 
 # Activate the cd-hit conda environment.
@@ -66,9 +67,9 @@ clustered_silva_db_fasta="${silva_db_dir}/SILVA_138_SSURef_NR99_tax_silva_trunc.
 
 if [ ! -s $clustered_silva_db_fasta ];
 then
-	echo -e "cd-hit -i ${silva_fixed_db_fasta} -c 0.97 -d 3000 -aS 0.1 -M 2000 -T 8 -o ${clustered_silva_db_fasta}\n"
+	echo -e "cd-hit -i ${silva_fixed_db_fasta} -c 0.97 -d 3000 -aS 0.1 -M 5000 -T 8 -o ${clustered_silva_db_fasta}\n"
 
-	cd-hit -i ${silva_fixed_db_fasta} -c 0.97 -d 3000 -aS 0.1 -M 2000 -T 8 -o ${clustered_silva_db_fasta}
+	cd-hit -i ${silva_fixed_db_fasta} -c 0.97 -d 3000 -aS 0.1 -M 5000 -T 8 -o ${clustered_silva_db_fasta}
 else
 	clustered_silva_db_fasta_filename=$(basename $clustered_silva_db_fasta)
 	echo "The ${clustered_silva_db_fasta_filename} file has already been created. Skipping to next set of commands!!!"
