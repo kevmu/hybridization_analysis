@@ -1,0 +1,53 @@
+
+# Download the GTDB 16S rRNA database.
+wget https://data.gtdb.ecogenomic.org/releases/release214/214.1/genomic_files_all/ssu_all_r214.tar.gz
+
+# Uncompress the tar.gz file.
+tar xvzf ssu_all_r214.tar.gz
+
+
+conda create --name fastp_env
+conda activate fastp_env
+conda install -c bioconda fastp
+
+# Building the emirge database.
+
+conda create --name cd_hit_env
+conda activate cd_hit_env
+conda install -c bioconda cd-hit
+
+
+
+cd-hit -i ssu_all_r214.fna -c 1.0 -d 3000 -aS 0.8 -M 20000 -o ssu_gtdb_r214_pct1.0_cov0.8.fa
+
+
+#source ~/.bashrc
+
+#conda activate cd_hit_env
+
+# cd-hit -i ssu_all_r214.fna -c 1.0 -d 3000 -aS 0.8 -M 20000 -T 8 -o ssu_gtdb_r214_pct1.0_cov0.8.fa
+
+[3/5 2:17 PM] Dumonceaux, Tim (AAFC/AAC)
+/home/AGR.GC.CA/dumonceauxt/phyto-hyb/SbGP/assemblies/sequences
+
+[3/5 2:21 PM] Dumonceaux, Tim (AAFC/AAC)
+peng.gao@agr.gc.ca
+
+[3/5 2:37 PM] Dumonceaux, Tim (AAFC/AAC)
+230801_M01666_0203_000000000-KTT65_IMPACTTlilacBBSPTWMQhybsEPL   - this run has both 16S hyb and cpn60 hyb for IMPACTT.  The first four are 16S and the second four are cpn60.  Was pooled with Jennifer’s samples and run by Kitty
+
+[3/5 2:38 PM] Dumonceaux, Tim (AAFC/AAC)
+/archive/dumonceauxt/230801_M01666_0203_000000000-KTT65_IMPACTTlilacBBSPTWMQhybsEPL/Fastq
+
+
+
+conda activate emirge_env
+conda create --name emirge_env
+conda install -c bioconda samtools=1.6=hb116620_7
+conda install -c bioconda biopython
+
+
+
+conda install -c bioconda emirge
+
+
