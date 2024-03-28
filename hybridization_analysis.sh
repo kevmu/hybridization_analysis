@@ -13,7 +13,7 @@
 source ~/.bashrc
 
 # The fastq input file directory.
-fastq_input_dir="/home/kevin.muirhead/impactt_hybrid/metqc_cleaned_renamed_reads"
+fastq_input_dir=""
 
 # The read1 fastq suffix.
 read1_suffix="_R1.fastq"
@@ -27,12 +27,12 @@ fastq_file_ext=".fastq"
 num_threads=8
 
 # Emirge databases
-emirge_fasta_db="/home/kevin.muirhead/impactt_hybrid/emirge_db/silva_db/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref.fasta"
+emirge_fasta_db="/home/AGR.GC.CA/muirheadk/hybridization_analysis/impactt_hybrid/emirge_db/silva_db/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref.fasta"
 
-emirge_bowtie_db="/home/kevin.muirhead/impactt_hybrid/emirge_db/silva_db/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref"
+emirge_bowtie_db="/home/AGR.GC.CA/muirheadk/hybridization_analysis/impactt_hybrid/emirge_db/silva_db/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref"
 
 # The base output directory.
-output_dir="/home/kevin.muirhead/impactt_hybrid/tkg_pilot_test"
+output_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis/impactt_hybrid/tkg_pilot_test"
 mkdir -p $output_dir
 
 # The preprocessing output directory.
@@ -63,7 +63,7 @@ sliding_window_phred_score=15
 # Minimum length for fastq reads.
 min_read_length=36
 
-### EMIRGE
+### EMIRGE parameters.
 
 # ITERATIONS
 # Number of iterations to perform.  It may be necessary
