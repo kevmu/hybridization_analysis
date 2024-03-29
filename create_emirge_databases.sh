@@ -94,7 +94,22 @@ fi
 # Activate the emirge conda environment.
 conda activate emirge_env
 
+
 emirge_silva_db_prefix="${silva_db_dir}/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref"
 
+# I NEED TO ADD THE IF STATEMENT SFOR THE BOWTIE DATABASE EXTENSION FILES
+#if [ ! -s $emirge_silva_db_fasta ];
+#then
+
+echo "bowtie-build ${emirge_silva_db_fasta} ${emirge_silva_db_prefix}"
 bowtie-build ${emirge_silva_db_fasta} ${emirge_silva_db_prefix}
+
+#else
+#	emirge_silva_db_fasta_filename=$(basename $emirge_silva_db_fasta)
+#	echo "The ${_filename} file has already been created. Skipping to next set of commands!!!"
+#fi
+
+
+echo "The emirge databases have been created successfully!!! ${emirge_silva_db_fasta} and ${emirge_silva_db_prefix}."
+
 

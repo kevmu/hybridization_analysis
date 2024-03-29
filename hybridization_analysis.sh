@@ -16,12 +16,12 @@ source ~/.bashrc
 fastq_input_dir="/archive/dumonceauxt/230801_M01666_0203_000000000-KTT65_IMPACTTlilacBBSPTWMQhybsEPL/Fastq"
 
 # The read1 fastq suffix.
-read1_suffix="_R1.fastq"
+read1_suffix="_L001_R1_001.fastq.gz"
 
 # The read2 fastq suffix.
-read2_suffix="_R2.fastq"
+read2_suffix="_L001_R2_001.fastq.gz"
 
-fastq_file_ext=".fastq"
+fastq_file_ext=".fastq.gz"
 
 # The number of cpu threads to use.
 num_threads=8
