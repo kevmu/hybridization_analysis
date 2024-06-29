@@ -15,5 +15,5 @@ conda install -c bioconda biopython_env\
 conda create --name cd_hit_env\
 conda activate cd_hit_env\
 conda install -c bioconda cd-hit\
-\
+
 
