@@ -3,16 +3,21 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
-#SBATCH --time=1-00:00:00
-#SBATCH --mem=20G
+#SBATCH --time=7-00:00:00
+#SBATCH --mem=60G
 #SBATCH --output=run_create_emirge_databases.%A.out
 #SBATCH --error=run_create_emirge_databases.%A.err
 
 source ~/.bashrc
 
-db_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis"
+#db_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis"
+db_dir="/bulk/sycuro_bulk/lsycuro_labshare/kevin/testing/hybridization_analysis/dbs"
 
-emirge_scripts_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis/EMIRGE"
+#emirge_scripts_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis/EMIRGE"
+emirge_scripts_dir="/bulk/sycuro_bulk/lsycuro_labshare/kevin/testing/hybridization_analysis/software/EMIRGE"
+
+# The number of threads to use in cd-hit.
+num_threads=8
 
 # The emirge database directory.
 emirge_db_dir="${db_dir}/emirge_db"
@@ -67,9 +72,9 @@ clustered_silva_db_fasta="${silva_db_dir}/SILVA_138_SSURef_NR99_tax_silva_trunc.
 
 if [ ! -s $clustered_silva_db_fasta ];
 then
-	echo -e "cd-hit -i ${silva_fixed_db_fasta} -c 0.97 -d 3000 -aS 0.1 -M 5000 -T 8 -o ${clustered_silva_db_fasta}\n"
+	echo -e "cd-hit -i ${silva_fixed_db_fasta} -c 1.0 -d 3000 -M 5000 -T ${num_threads} -o ${clustered_silva_db_fasta}\n"
 
-	cd-hit -i ${silva_fixed_db_fasta} -c 0.97 -d 3000 -aS 0.1 -M 5000 -T 8 -o ${clustered_silva_db_fasta}
+	cd-hit -i ${silva_fixed_db_fasta} -c 1.0 -d 3000 -M 5000 -T ${num_threads} -o ${clustered_silva_db_fasta}
 else
 	clustered_silva_db_fasta_filename=$(basename $clustered_silva_db_fasta)
 	echo "The ${clustered_silva_db_fasta_filename} file has already been created. Skipping to next set of commands!!!"
@@ -96,6 +101,7 @@ conda activate emirge_env
 
 
 emirge_silva_db_prefix="${silva_db_dir}/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref"
+##find /bulk/sycuro_bulk/lsycuro_labshare/kevin/testing/hybridization_analysis/dbs/emirge_db/silva_db -type f -name "*.bt2"
 
 # I NEED TO ADD THE IF STATEMENT SFOR THE BOWTIE DATABASE EXTENSION FILES
 #if [ ! -s $emirge_silva_db_fasta ];

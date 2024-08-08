@@ -13,32 +13,49 @@
 source ~/.bashrc
 
 # The fastq input file directory.
-fastq_input_dir="/archive/dumonceauxt/230801_M01666_0203_000000000-KTT65_IMPACTTlilacBBSPTWMQhybsEPL/Fastq"
+#fastq_input_dir="/archive/dumonceauxt/230801_M01666_0203_000000000-KTT65_IMPACTTlilacBBSPTWMQhybsEPL/Fastq"
+fastq_input_dir="/bulk/sycuro_bulk/lsycuro_labshare/kevin/tkg_pilot_project_2021/metqc_cleaned_renamed_reads"
 
 # The read1 fastq suffix.
-read1_suffix="_L001_R1_001.fastq.gz"
+#read1_suffix="_L001_R1_001.fastq.gz"
+read1_suffix="_R1.fastq"
 
 # The read2 fastq suffix.
-read2_suffix="_L001_R2_001.fastq.gz"
+#read2_suffix="_L001_R2_001.fastq.gz"
+read2_suffix="_R2.fastq"
 
-fastq_file_ext=".fastq.gz"
+# The fastq file extension.
+#fastq_file_ext=".fastq.gz"
+fastq_file_ext=".fastq"
 
 # The number of cpu threads to use.
 num_threads=8
 
-# Emirge databases
-emirge_fasta_db="/home/AGR.GC.CA/muirheadk/hybridization_analysis/emirge_db/silva_db/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref.fasta"
+# The emirge database directory.
+#emirge_db_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis/emirge_db"
+emirge_db_dir="/bulk/sycuro_bulk/lsycuro_labshare/kevin/testing/hybridization_analysis/dbs/emirge_db"
 
-emirge_bowtie_db="/home/AGR.GC.CA/muirheadk/hybridization_analysis/emirge_db/silva_db/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref"
+# The emirge silva database directory.
+silva_emirge_dir="${emirge_db_dir}/silva_db"
+
+## Emirge databases
+
+# Emirge silva fasta database.
+emirge_fasta_db="${silva_emirge_dir}/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref.fasta"
+
+# Emirge silva bowtie database.
+emirge_bowtie_db="${silva_emirge_dir}/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref"
 
 # The base output directory.
-output_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis/impactt_hybrid"
+#output_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis/impactt_hybrid"
+output_dir="/bulk/sycuro_bulk/lsycuro_labshare/kevin/testing/hybridization_analysis/output"
 mkdir -p $output_dir
 
 # The preprocessing output directory.
 preprocessing_output_dir="${output_dir}/preprocessing"
 mkdir -p $preprocessing_output_dir
 
+# The fastq list file of fastq filenames.
 fastq_list_file="${preprocessing_output_dir}/fastq_files_list.txt"
 
 # The emirge output directory.
@@ -50,7 +67,7 @@ emirge_output_dir="${output_dir}/emirge"
 cut_leading_bases=3
 
 # Cut bases off the end of a read, if below a threshold quality < N.
-cut_trailing_bases=20
+cut_trailing_bases=3 
 
 ## Use a sliding window of size sliding_window_size that will remove bases if their phred score is below sliding_window_phred_score.
 
@@ -76,12 +93,14 @@ num_iter=40
 # exceeds this threhold, then split the candidate into
 # two sequences for next iteration.  See also
 # --variant_fraction_thresh. (default: 0.04)
-snp_fraction_thresh=0.30
+#snp_fraction_thresh=0.30
+snp_fraction_thresh=0.04
 
 # VARIANT_FRACTION_THRESH
 # minimum probability of second most probable base at a
 # site required in order to call site a variant.  See
 # also --snp_fraction_thresh.  (default: 0.10)
+#variant_fraction_thresh=0.10
 variant_fraction_thresh=0.10
 
 # JOIN_THRESHOLD
@@ -96,6 +115,16 @@ join_threshold=0.97
 # sequence is discarded for next iteration (default: 3)
 min_depth=3
 
+# length of longest read in input data.
+max_read_length=150
+
+# INSERT_MEAN
+# insert size distribution mean.
+insert_mean=240
+
+# INSERT_STDDEV
+# insert size distribution standard deviation.
+insert_stddev=100
 
 # Find all the fastq files in the dataset and write the full path to the file.
 echo "find ${fastq_input_dir} -name \"*${fastq_file_ext}\" -type f | sed \"s/${read1_suffix}\|${read2_suffix}//g\" | rev | cut -d '/' -f1 | rev | sort -V | uniq > ${fastq_list_file}"
@@ -215,17 +244,19 @@ do
     # MAX_READ_LENGTH
     # length of longest read in input data.
     #SN      maximum length: 151
-    max_read_length=$(grep "^SN\s\+maximum length:" ${insert_size_stats_file} | sed -e 's/SN\tmaximum length:\t\([0-9]\+\)/\1/g')
+#    max_read_length=$(grep "maximum length" ${insert_size_stats_file} | cut -f3 | xargs printf "%.0f\n")
     
     # INSERT_MEAN
     # insert size distribution mean.
     #SN      insert size average:    227.2
-    insert_mean=$(grep "^SN\s\+insert size average:" ${insert_size_stats_file} | sed -e 's/SN\tinsert size average:\t\([0-9]\+\)/\1/g' | cut -d '.' -f1)
+    # Get the rounded value for the insert size average because emirge needs a whole number.
+#    insert_mean=$(grep "insert size average" ${insert_size_stats_file} | cut -f3 | xargs printf "%.0f\n")
     
     # INSERT_STDDEV
     # insert size distribution standard deviation.
     #SN      insert size standard deviation: 79.0
-    insert_stddev=$(grep "^SN\s\+insert size standard deviation:" ${insert_size_stats_file} | sed -e 's/SN\tinsert size standard deviation:\t\([0-9]\+\)/\1/g' | cut -d '.' -f1)
+    # Get the rounded value for the insert size standard deviation because emirge needs a whole number.
+#    insert_stddev=$(grep "insert size standard deviation" ${insert_size_stats_file} | cut -f3 | xargs printf "%.0f\n")
         
     emirge_sample_output_dir="${emirge_output_dir}/${fastq_filename}"
     mkdir -p ${emirge_sample_output_dir}
