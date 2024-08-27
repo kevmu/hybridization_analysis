@@ -10,18 +10,14 @@
 
 source ~/.bashrc
 
-db_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis/dbs"
+db_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis/emirge_dbs"
 
 emirge_scripts_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis/software/EMIRGE"
 
 # The number of threads to use in cd-hit.
 num_threads=8
 
-# The emirge database directory.
-emirge_db_dir="${db_dir}/emirge_db"
-mkdir -p $emirge_db_dir
-
-silva_db_dir="${emirge_db_dir}/silva_db"
+silva_db_dir="${db_dir}/silva_db"
 mkdir -p $silva_db_dir
 
 compressed_silva_db="${silva_db_dir}/SILVA_138_SSURef_NR99_tax_silva_trunc.fasta.gz"

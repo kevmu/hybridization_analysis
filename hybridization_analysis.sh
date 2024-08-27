@@ -12,43 +12,52 @@
 # Get the source ~/.bashrc file so that we can use conda.
 source ~/.bashrc
 
+# The list of fastq filenames.
+fastq_list_file="/home/AGR.GC.CA/muirheadk/hybridization_analysis/fastq_files_list.txt"
+
 # The fastq input file directory.
-#fastq_input_dir="/archive/dumonceauxt/230801_M01666_0203_000000000-KTT65_IMPACTTlilacBBSPTWMQhybsEPL/Fastq"
-fastq_input_dir="/bulk/sycuro_bulk/lsycuro_labshare/kevin/tkg_pilot_project_2021/metqc_cleaned_renamed_reads"
+fastq_input_dir="/archive/dumonceauxt/230801_M01666_0203_000000000-KTT65_IMPACTTlilacBBSPTWMQhybsEPL/Fastq"
+#fastq_input_dir="/home/AGR.GC.CA/muirheadk/hybridization_datasets/cpn60"
 
 # The read1 fastq suffix.
-#read1_suffix="_L001_R1_001.fastq.gz"
-read1_suffix="_R1.fastq"
+read1_suffix="_L001_R1_001.fastq.gz"
 
 # The read2 fastq suffix.
-#read2_suffix="_L001_R2_001.fastq.gz"
-read2_suffix="_R2.fastq"
+read2_suffix="_L001_R2_001.fastq.gz"
 
 # The fastq file extension.
 #fastq_file_ext=".fastq.gz"
-fastq_file_ext=".fastq"
+#fastq_file_ext=".fastq"
 
 # The number of cpu threads to use.
-num_threads=8
-
-# The emirge database directory.
-#emirge_db_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis/emirge_db"
-emirge_db_dir="/bulk/sycuro_bulk/lsycuro_labshare/kevin/testing/hybridization_analysis/dbs/emirge_db"
-
-# The emirge silva database directory.
-silva_emirge_dir="${emirge_db_dir}/silva_db"
+num_threads=40
 
 ## Emirge databases
 
+# SILVA databases.
+
 # Emirge silva fasta database.
-emirge_fasta_db="${silva_emirge_dir}/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref.fasta"
+emirge_fasta_db="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/emirge_dbs/silva_db/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref.fasta"
 
 # Emirge silva bowtie database.
-emirge_bowtie_db="${silva_emirge_dir}/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref"
+emirge_bowtie_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/emirge_dbs/silva_db/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref"
+
+# Cpn60 UT databases.
+
+# Emirge cpn60 UT fasta database.
+#emirge_fasta_db="/home/AGR.GC.CA/muirheadk/hybridization_analysis/emirge_dbs/cpn60_db/cpn60_all_nut_seq.clustered.emirge.ref.fasta"
+
+# Emirge cpn60 UT bowtie database.
+#emirge_bowtie_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/emirge_dbs/cpn60_db/cpn60_all_nut_seq.clustered.emirge.ref"
+
+## Bowtie2 database index for mapping reads and automatically determining the parameters for emirge.
+
+# The bowtie2 database index.
+bowtie2_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/bowtie2_db_indexs/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref"
 
 # The base output directory.
-#output_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis/impactt_hybrid"
-output_dir="/bulk/sycuro_bulk/lsycuro_labshare/kevin/testing/hybridization_analysis/output"
+#output_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis/cpn60_analysis_output"
+output_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis/16S_analysis_output"
 mkdir -p $output_dir
 
 # The preprocessing output directory.
@@ -56,7 +65,7 @@ preprocessing_output_dir="${output_dir}/preprocessing"
 mkdir -p $preprocessing_output_dir
 
 # The fastq list file of fastq filenames.
-fastq_list_file="${preprocessing_output_dir}/fastq_files_list.txt"
+#fastq_list_file="${preprocessing_output_dir}/fastq_files_list.txt"
 
 # The emirge output directory.
 emirge_output_dir="${output_dir}/emirge"
@@ -116,19 +125,22 @@ join_threshold=0.97
 min_depth=3
 
 # length of longest read in input data.
-max_read_length=150
+#max_read_length=150
 
 # INSERT_MEAN
 # insert size distribution mean.
-insert_mean=240
+#insert_mean=240
 
 # INSERT_STDDEV
 # insert size distribution standard deviation.
-insert_stddev=100
+#insert_stddev=100
 
 # Find all the fastq files in the dataset and write the full path to the file.
-echo "find ${fastq_input_dir} -name \"*${fastq_file_ext}\" -type f | sed \"s/${read1_suffix}\|${read2_suffix}//g\" | rev | cut -d '/' -f1 | rev | sort -V | uniq > ${fastq_list_file}"
-find ${fastq_input_dir} -name "*${fastq_file_ext}" -type f | sed "s/${read1_suffix}\|${read2_suffix}//g" | rev | cut -d '/' -f1 | rev | sort -V | uniq > ${fastq_list_file}
+#echo "find ${fastq_input_dir} -type f -name \"*${fastq_file_ext}\" | sed \"s/${read1_suffix}\|${read2_suffix}//g\" | rev | cut -d '/' -f1 | rev | sort -V | uniq > ${fastq_list_file}"
+#find ${fastq_input_dir} -type f -name "*${fastq_file_ext}" | sed "s/${read1_suffix}\|${read2_suffix}//g" | rev | cut -d '/' -f1 | rev | sort -V | uniq > ${fastq_list_file}
+
+#echo "find ${fastq_input_dir} -type f -name \"*${fastq_file_ext}\" | sed \"s/${read1_suffix}\|${read2_suffix}//g\" | rev | cut -d '/' -f1 | rev | sort -V | uniq | grep "16S" > ${fastq_list_file}"
+#find ${fastq_input_dir} -type f -name "*${fastq_file_ext}" | sed "s/${read1_suffix}\|${read2_suffix}//g" | rev | cut -d '/' -f1 | rev | sort -V | uniq | grep "16S" > ${fastq_list_file}
 
 
 #step 1: trimmomatic
@@ -198,8 +210,8 @@ do
     
     if [ ! -s $insert_size_sam_file ];
     then
-        echo "bowtie2 -x ${emirge_bowtie_db} -p ${num_threads} -1 ${trim_paired_fastq_file} -2 ${trim_paired_rev_fastq_file} > ${insert_size_sam_file}"
-        bowtie2 -x ${emirge_bowtie_db} -p ${num_threads} -1 ${trim_paired_fastq_file} -2 ${trim_paired_rev_fastq_file} > ${insert_size_sam_file}
+        echo "bowtie2 -x ${bowtie2_db_index} -p ${num_threads} -1 ${trim_paired_fastq_file} -2 ${trim_paired_rev_fastq_file} > ${insert_size_sam_file}"
+        bowtie2 -x ${bowtie2_db_index} -p ${num_threads} -1 ${trim_paired_fastq_file} -2 ${trim_paired_rev_fastq_file} > ${insert_size_sam_file}
     else
         insert_size_sam_file_filename=$(basename $insert_size_sam_file)
         echo "The ${insert_size_sam_file_filename} file has already been created. Skipping to next set of commands!!!"
@@ -244,30 +256,30 @@ do
     # MAX_READ_LENGTH
     # length of longest read in input data.
     #SN      maximum length: 151
-#    max_read_length=$(grep "maximum length" ${insert_size_stats_file} | cut -f3 | xargs printf "%.0f\n")
+    max_read_length=$(grep "maximum length" ${insert_size_stats_file} | cut -f3 | xargs printf "%.0f\n")
     
     # INSERT_MEAN
     # insert size distribution mean.
     #SN      insert size average:    227.2
     # Get the rounded value for the insert size average because emirge needs a whole number.
-#    insert_mean=$(grep "insert size average" ${insert_size_stats_file} | cut -f3 | xargs printf "%.0f\n")
+    insert_mean=$(grep "insert size average" ${insert_size_stats_file} | cut -f3 | xargs printf "%.0f\n")
     
     # INSERT_STDDEV
     # insert size distribution standard deviation.
     #SN      insert size standard deviation: 79.0
     # Get the rounded value for the insert size standard deviation because emirge needs a whole number.
-#    insert_stddev=$(grep "insert size standard deviation" ${insert_size_stats_file} | cut -f3 | xargs printf "%.0f\n")
+    insert_stddev=$(grep "insert size standard deviation" ${insert_size_stats_file} | cut -f3 | xargs printf "%.0f\n")
         
     emirge_sample_output_dir="${emirge_output_dir}/${fastq_filename}"
     mkdir -p ${emirge_sample_output_dir}
-    
+
     conda activate emirge_env
     
-    echo "emirge.py ${emirge_sample_output_dir} -1 ${trim_paired_fastq_file} -2 ${trim_paired_rev_fastq_file} -f ${emirge_fasta_db} -b  ${emirge_bowtie_db} -l ${max_read_length} -i ${insert_mean} -s ${insert_stddev} -n ${num_iter} -a ${num_threads} -p  ${snp_fraction_thresh} -v ${variant_fraction_thresh} -j ${join_threshold} -c ${min_depth} --phred33"
-    emirge.py ${emirge_sample_output_dir} -1 ${trim_paired_fastq_file} -2 ${trim_paired_rev_fastq_file} -f ${emirge_fasta_db} -b  ${emirge_bowtie_db} -l ${max_read_length} -i ${insert_mean} -s ${insert_stddev} -n ${num_iter} -a ${num_threads} -p  ${snp_fraction_thresh} -v ${variant_fraction_thresh} -j ${join_threshold} -c ${min_depth} --phred33
+    echo "emirge.py ${emirge_sample_output_dir} -1 ${trim_paired_fastq_file} -2 ${trim_paired_rev_fastq_file} -f ${emirge_fasta_db} -b  ${emirge_bowtie_db_index} -l ${max_read_length} -i ${insert_mean} -s ${insert_stddev} -n ${num_iter} -a ${num_threads} -p  ${snp_fraction_thresh} -v ${variant_fraction_thresh} -j ${join_threshold} -c ${min_depth} --phred33"
+    emirge.py ${emirge_sample_output_dir} -1 ${trim_paired_fastq_file} -2 ${trim_paired_rev_fastq_file} -f ${emirge_fasta_db} -b  ${emirge_bowtie_db_index} -l ${max_read_length} -i ${insert_mean} -s ${insert_stddev} -n ${num_iter} -a ${num_threads} -p  ${snp_fraction_thresh} -v ${variant_fraction_thresh} -j ${join_threshold} -c ${min_depth} --phred33
 
-    emirge_iter_file="${emirge_sample_output_dir}/${fastq_filename}/iter.${num_iter}"
-    emirge_renamed_file="${emirge_sample_output_dir}/${fastq_filename}/${fastq_filename}_emirge.fasta"
+    emirge_iter_file="${emirge_sample_output_dir}/iter.${num_iter}"
+    emirge_renamed_file="${emirge_sample_output_dir}/${fastq_filename}_emirge.fasta"
     
     echo "emirge_rename_fasta.py ${emirge_iter_file} > ${emirge_renamed_file}"
     emirge_rename_fasta.py ${emirge_iter_file} > ${emirge_renamed_file}

@@ -63,7 +63,7 @@ for record in SeqIO.parse(fasta_infile, "fasta"):
     seq = record.seq
     seq_length = len(seq)
     
-    if((int(seq_length) >= int(min_seq_length_ref_db)) and (int(seq_length) >= int(max_seq_length_ref_db))):
+    if((int(seq_length) >= int(min_seq_length_ref_db)) and (int(seq_length) <= int(max_seq_length_ref_db))):
         SeqIO.write(record, fasta_output_file1, "fasta")
 
     if(int(seq_length) >= int(min_seq_length_vsearch_db)):
