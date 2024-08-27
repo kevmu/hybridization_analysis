@@ -7,6 +7,9 @@ git clone https://github.com/kevmu/hybridization_analysis.git
 cd hybridization_analysis
 
 # Install Conda environments.
+conda create --name cutadapt_env
+conda activate cutadapt_env
+conda install -c bioconda cutadapt
 
 conda create --name emirge_env\
 conda activate emirge_env\
@@ -52,6 +55,9 @@ tar xvzf prinseq-lite-0.20.4.tar.gz
 # Download the usearch source code.
 wget https://www.drive5.com/downloads/usearch11.0.667_i86linux32.gz -O usearch.gz
 
+# Add the path to usearch to your ~/.bashrc file.
+export PATH="$HOME/hybridization_analysis/software/prinseq-lite-0.20.4:$PATH"
+
 ## usearch
 
 # Uncompress the usearch binary code.
@@ -60,8 +66,8 @@ gunzip -c usearch.gz > usearch
 # Make usearch permissions all read and execute.
 chmod a+rx usearch
 
-# Add the path to usearch to your .bashrc or .bash_profile
-export PATH=$HOME/hybridization_analysis/software:$PATH
+# Add the path to usearch to your ~/.bashrc file.
+export PATH="$HOME/hybridization_analysis/software:$PATH"
 
 # Get the source of your .bashrc or .bash_profile
 source ~/.bashrc

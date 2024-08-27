@@ -70,24 +70,41 @@ mkdir -p $preprocessing_output_dir
 # The emirge output directory.
 emirge_output_dir="${output_dir}/emirge"
 
-### Trimmomatic program parameters.
+### Cutadapt program parameters.
 
-# Cut bases off the start of a read, if below a threshold quality < N.
-cut_leading_bases=3
+# The forward adapter sequence for cutadapt.
+#T7-A 5’-GGATTCTAATACGACTCACTATAGGGATCGCACCAGCGTGT-3’ 
+fwd_adapter="GGATTCTAATACGACTCACTATAGGGATCGCACCAGCGTGT"
 
-# Cut bases off the end of a read, if below a threshold quality < N.
-cut_trailing_bases=3 
+# The reverse adapter sequence for cutadapt.
+#B 5’-CGTGGATGAGGAGCCGCAGTG-3’
+rev_adapter="CGTGGATGAGGAGCCGCAGTG"
 
-## Use a sliding window of size sliding_window_size that will remove bases if their phred score is below sliding_window_phred_score.
+### Prinseq program parameters.
 
-# Sliding window of size N.
-sliding_window_size=4
+min_qual_mean=25
 
-# Remove bases if their phred score is below 20
-sliding_window_phred_score=15
+ns_max_p=1
 
-# Minimum length for fastq reads.
-min_read_length=36
+trim_qual_left=20
+
+trim_qual_right=20
+
+trim_qual_window=3
+
+trim_qual_step=1
+
+trim_qual_type="mean"
+
+trim_qual_rule="lt"
+
+lc_method="dust"
+
+lc_threshold=7
+
+
+# The minimum length of fastq reads after filtering.
+min_len=60
 
 ### EMIRGE parameters.
 
@@ -143,48 +160,73 @@ min_depth=3
 #find ${fastq_input_dir} -type f -name "*${fastq_file_ext}" | sed "s/${read1_suffix}\|${read2_suffix}//g" | rev | cut -d '/' -f1 | rev | sort -V | uniq | grep "16S" > ${fastq_list_file}
 
 
-#step 1: trimmomatic
+# Cutadapt
 
-# Activate the trimmomatic conda environment.
-conda activate trimmomatic_env
 
-# Make the trimmomatic trim output directory.
-trim_fastq_dir="${preprocessing_output_dir}/trim"
-mkdir -p $trim_fastq_dir
+# Activate the cutadapt conda environment.
+conda activate cutadapt_env
+
+# Make the cutadapt output directory.
+cutadapt_dir="${preprocessing_output_dir}/cutadapt"
+mkdir -p $cutadapt_dir
+
+for fastq_filename in $(cat $fastq_list_file);
+do
+    echo "Processing ${fastq_filename}......";
+
+    fastq_read1_file="${fastq_input_dir}/${fastq_filename}${read1_suffix}"
+    fastq_read2_file="${fastq_input_dir}/${fastq_filename}${read2_suffix}"
+    
+    trimmed_fastq_read1_file="${cutadapt_dir}/${fastq_filename}_trimmed_R1.fastq"
+    trimmed_fastq_read2_file="${cutadapt_dir}/${fastq_filename}_trimmed_R2.fastq"
+
+    echo "cutadapt -m ${min_len} --max-n ${ns_max_p} -a ${fwd_adapter} -A ${rev_adapter} -j ${num_threads} -o ${trimmed_fastq_read1_file} -p ${trimmed_fastq_read2_file} ${fastq_read1_file} ${fastq_read2_file}"
+    cutadapt -m ${min_len} --max-n ${ns_max_p} -a ${fwd_adapter} -A ${rev_adapter} -j ${num_threads} -o ${trimmed_fastq_read1_file} -p ${trimmed_fastq_read2_file} ${fastq_read1_file} ${fastq_read2_file}
+
+done
+
+### Prinseq 
+
+# Activate the prinseq conda environment.
+conda activate prinseq_env
+
+# Make the prinseq output directory.
+prinseq_dir="${preprocessing_output_dir}/prinseq"
+mkdir -p $prinseq_dir
 
 for fastq_filename in $(cat $fastq_list_file);
 do
     echo "Processing ${fastq_filename}......";
     
-    fastq_read1_file="${fastq_input_dir}/${fastq_filename}${read1_suffix}";
-    fastq_read2_file="${fastq_input_dir}/${fastq_filename}${read2_suffix}";
+    trimmed_fastq_read1_file="${cutadapt_dir}/${fastq_filename}_trimmed_R1.fastq"
+    trimmed_fastq_read2_file="${cutadapt_dir}/${fastq_filename}_trimmed_R2.fastq"
 
-    trim_paired_fastq_file="${trim_fastq_dir}/${fastq_filename}.paired.fq";
-    trim_unpaired_fastq_file="${trim_fastq_dir}/${fastq_filename}.unpaired.fq";
-    trim_paired_rev_fastq_file="${trim_fastq_dir}/${fastq_filename}.paired.reverse.fq";
-    trim_unpaired_rev_fastq_file="${trim_fastq_dir}/${fastq_filename}.unpaired.reverse.fq";
+    prinseq_sample_dir="${prinseq_dir}/${fastq_filename}"
+    mkdir -p $prinseq_sample_dir
+
+    fastq_file_prefix="${prinseq_sample_dir}/${fastq_filename}_filtered"
+
+    echo "perl software/prinseq-lite-0.20.4/prinseq-lite.pl -fastq ${trimmed_fastq_read1_file} -fastq2 ${trimmed_fastq_read2_file} -out_format 3 -out_good ${fastq_file_prefix} -out_bad null -no_qual_header -min_qual_mean ${min_qual_mean} -ns_max_p ${ns_max_p} -lc_method ${lc_method} -lc_threshold ${lc_threshold} -trim_qual_left ${trim_qual_left} -trim_qual_right ${trim_qual_right} -trim_qual_type ${trim_qual_type} -trim_qual_rule ${trim_qual_rule} -trim_qual_window ${trim_qual_window} -trim_qual_step ${trim_qual_step} -min_len ${min_len} –verbose"
+    perl software/prinseq-lite-0.20.4/prinseq-lite.pl -fastq ${trimmed_fastq_read1_file} -fastq2 ${trimmed_fastq_read2_file} -out_format 3 -out_good ${fastq_file_prefix} -out_bad null -no_qual_header -min_qual_mean ${min_qual_mean} -ns_max_p ${ns_max_p} -lc_method ${lc_method} -lc_threshold ${lc_threshold} -trim_qual_left ${trim_qual_left} -trim_qual_right ${trim_qual_right} -trim_qual_type ${trim_qual_type} -trim_qual_rule ${trim_qual_rule} -trim_qual_window ${trim_qual_window} -trim_qual_step ${trim_qual_step} -min_len ${min_len} –verbose
+
+    #    if [ ! -s $trimmed_fastq_read1_file ] && [ ! -s $trim_unpaired_fastq_file ] && [  ! -s $trimmed_fastq_read2_file ] && [  ! -s $trim_unpaired_rev_fastq_file ];
+#    then
+
+#    else
     
-    if [ ! -s $trim_paired_fastq_file ] && [ ! -s $trim_unpaired_fastq_file ] && [  ! -s $trim_paired_rev_fastq_file ] && [  ! -s $trim_unpaired_rev_fastq_file ];
-    then
-        echo "trimmomatic PE ${fastq_read1_file} ${fastq_read2_file} ${trim_paired_fastq_file} ${trim_unpaired_fastq_file} ${trim_paired_rev_fastq_file} ${trim_unpaired_rev_fastq_file} LEADING:${cut_leading_bases} TRAILING:${cut_trailing_bases} SLIDINGWINDOW:${sliding_window_size}:${sliding_window_phred_score} MINLEN:${min_read_length}";
+#        trimmed_fastq_read1_file_filename=$(basename $trimmed_fastq_read1_file)
+#        trim_unpaired_fastq_file_filename=$(basename $trim_unpaired_fastq_file)
+#        trimmed_fastq_read2_file_filename=$(basename $trimmed_fastq_read2_file)
+#        trim_unpaired_rev_fastq_file_filename=$(basename $trim_unpaired_rev_fastq_file)
         
-        trimmomatic PE ${fastq_read1_file} ${fastq_read2_file} ${trim_paired_fastq_file} ${trim_unpaired_fastq_file} ${trim_paired_rev_fastq_file} ${trim_unpaired_rev_fastq_file} LEADING:${cut_leading_bases} TRAILING:${cut_trailing_bases} SLIDINGWINDOW:${sliding_window_size}:${sliding_window_phred_score} MINLEN:${min_read_length};
-    else
-    
-        trim_paired_fastq_file_filename=$(basename $trim_paired_fastq_file)
-        trim_unpaired_fastq_file_filename=$(basename $trim_unpaired_fastq_file)
-        trim_paired_rev_fastq_file_filename=$(basename $trim_paired_rev_fastq_file)
-        trim_unpaired_rev_fastq_file_filename=$(basename $trim_unpaired_rev_fastq_file)
-        
-        echo "The following files have already been created."
-        echo "${trim_paired_fastq_file_filename}"
-        echo "${trim_unpaired_fastq_file_filename}"
-        echo "${trim_paired_rev_fastq_file_filename}"
-        echo "${trim_unpaired_rev_fastq_file_filename}"
-        echo "Skipping to next set of commands!!!"
-    fi
+#        echo "The following files have already been created."
+#        echo "${trimmed_fastq_read1_file_filename}"
+#        echo "${trim_unpaired_fastq_file_filename}"
+#        echo "${trimmed_fastq_read2_file_filename}"
+#        echo "${trim_unpaired_rev_fastq_file_filename}"
+#        echo "Skipping to next set of commands!!!"
+#    fi
 done
-
 
 # Make the insert size output directory.
 insert_size_dir="${output_dir}/insert_size"
@@ -193,15 +235,10 @@ mkdir -p $insert_size_dir
 for fastq_filename in $(cat $fastq_list_file);
 do
     echo "Processing ${fastq_filename}......";
-    
-    fastq_read1_file="${fastq_input_dir}/${fastq_filename}${read1_suffix}";
-    fastq_read2_file="${fastq_input_dir}/${fastq_filename}${read2_suffix}";
 
-    trim_paired_fastq_file="${trim_fastq_dir}/${fastq_filename}.paired.fq";
-    trim_unpaired_fastq_file="${trim_fastq_dir}/${fastq_filename}.unpaired.fq";
-    trim_paired_rev_fastq_file="${trim_fastq_dir}/${fastq_filename}.paired.reverse.fq";
-    trim_unpaired_rev_fastq_file="${trim_fastq_dir}/${fastq_filename}.unpaired.reverse.fq";
-    
+    trimmed_fastq_read1_file="${cutadapt_dir}/${fastq_filename}_trimmed_R1.fastq"
+    trimmed_fastq_read2_file="${cutadapt_dir}/${fastq_filename}_trimmed_R2.fastq"
+        
     insert_size_sam_file="${insert_size_dir}/${fastq_filename}_insert_size.sam"
     insert_size_bam_file="${insert_size_dir}/${fastq_filename}_insert_size.bam"
     insert_size_stats_file="${insert_size_dir}/${fastq_filename}_insert_size_stats.txt"
@@ -210,8 +247,8 @@ do
     
     if [ ! -s $insert_size_sam_file ];
     then
-        echo "bowtie2 -x ${bowtie2_db_index} -p ${num_threads} -1 ${trim_paired_fastq_file} -2 ${trim_paired_rev_fastq_file} > ${insert_size_sam_file}"
-        bowtie2 -x ${bowtie2_db_index} -p ${num_threads} -1 ${trim_paired_fastq_file} -2 ${trim_paired_rev_fastq_file} > ${insert_size_sam_file}
+        echo "bowtie2 -x ${bowtie2_db_index} -p ${num_threads} -1 ${trimmed_fastq_read1_file} -2 ${trimmed_fastq_read2_file} > ${insert_size_sam_file}"
+        bowtie2 -x ${bowtie2_db_index} -p ${num_threads} -1 ${trimmed_fastq_read1_file} -2 ${trimmed_fastq_read2_file} > ${insert_size_sam_file}
     else
         insert_size_sam_file_filename=$(basename $insert_size_sam_file)
         echo "The ${insert_size_sam_file_filename} file has already been created. Skipping to next set of commands!!!"
@@ -241,16 +278,15 @@ done
 
 
 
+### Emirge
 
 for fastq_filename in $(cat $fastq_list_file);
 do
     echo "Processing ${fastq_filename}......";
     
-    trim_paired_fastq_file="${trim_fastq_dir}/${fastq_filename}.paired.fq";
-    trim_unpaired_fastq_file="${trim_fastq_dir}/${fastq_filename}.unpaired.fq";
-    trim_paired_rev_fastq_file="${trim_fastq_dir}/${fastq_filename}.paired.reverse.fq";
-    trim_unpaired_rev_fastq_file="${trim_fastq_dir}/${fastq_filename}.unpaired.reverse.fq";
-        
+    trimmed_fastq_read1_file="${cutadapt_dir}/${fastq_filename}_trimmed_R1.fastq"
+    trimmed_fastq_read2_file="${cutadapt_dir}/${fastq_filename}_trimmed_R2.fastq"
+ 
     insert_size_stats_file="${insert_size_dir}/${fastq_filename}_insert_size_stats.txt"
     
     # MAX_READ_LENGTH
@@ -275,8 +311,8 @@ do
 
     conda activate emirge_env
     
-    echo "emirge.py ${emirge_sample_output_dir} -1 ${trim_paired_fastq_file} -2 ${trim_paired_rev_fastq_file} -f ${emirge_fasta_db} -b  ${emirge_bowtie_db_index} -l ${max_read_length} -i ${insert_mean} -s ${insert_stddev} -n ${num_iter} -a ${num_threads} -p  ${snp_fraction_thresh} -v ${variant_fraction_thresh} -j ${join_threshold} -c ${min_depth} --phred33"
-    emirge.py ${emirge_sample_output_dir} -1 ${trim_paired_fastq_file} -2 ${trim_paired_rev_fastq_file} -f ${emirge_fasta_db} -b  ${emirge_bowtie_db_index} -l ${max_read_length} -i ${insert_mean} -s ${insert_stddev} -n ${num_iter} -a ${num_threads} -p  ${snp_fraction_thresh} -v ${variant_fraction_thresh} -j ${join_threshold} -c ${min_depth} --phred33
+    echo "emirge.py ${emirge_sample_output_dir} -1 ${trimmed_fastq_read1_file} -2 ${trimmed_fastq_read2_file} -f ${emirge_fasta_db} -b  ${emirge_bowtie_db_index} -l ${max_read_length} -i ${insert_mean} -s ${insert_stddev} -n ${num_iter} -a ${num_threads} -p  ${snp_fraction_thresh} -v ${variant_fraction_thresh} -j ${join_threshold} -c ${min_depth} --phred33"
+    emirge.py ${emirge_sample_output_dir} -1 ${trimmed_fastq_read1_file} -2 ${trimmed_fastq_read2_file} -f ${emirge_fasta_db} -b  ${emirge_bowtie_db_index} -l ${max_read_length} -i ${insert_mean} -s ${insert_stddev} -n ${num_iter} -a ${num_threads} -p  ${snp_fraction_thresh} -v ${variant_fraction_thresh} -j ${join_threshold} -c ${min_depth} --phred33
 
     emirge_iter_file="${emirge_sample_output_dir}/iter.${num_iter}"
     emirge_renamed_file="${emirge_sample_output_dir}/${fastq_filename}_emirge.fasta"
