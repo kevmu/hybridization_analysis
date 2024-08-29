@@ -7,24 +7,17 @@ git clone https://github.com/kevmu/hybridization_analysis.git
 cd hybridization_analysis
 
 # Install Conda environments.
+
 conda create --name cutadapt_env
 conda activate cutadapt_env
 conda install -c bioconda cutadapt
 
-conda create --name emirge_env\
-conda activate emirge_env\
-conda install -c bioconda emirge\
-\
-conda create --name trimmomatic_env\
-conda activate trimmomatic_env\
-conda install -c bioconda trimmomatic\
-\
-conda create --name biopython_env\
-conda activate biopython_env\
-conda install -c bioconda biopython\
-\
-conda create --name cd_hit_env\
-conda activate cd_hit_env\
+conda create --name biopython_env
+conda activate biopython_env
+conda install -c bioconda biopython
+
+conda create --name cd_hit_env
+conda activate cd_hit_env
 conda install -c bioconda cd-hit
 
 conda create --name cutadapt_env
@@ -35,6 +28,17 @@ conda create --name prinseq_env
 conda activate prinseq_env
 conda install -c bioconda prinseq
 
+conda create --name emirge_env
+conda activate emirge_env
+conda install -c bioconda emirge
+
+conda create --name vsearch_env
+conda activate vsearch_env
+conda install -c bioconda vsearch
+
+conda create --name qiime_env
+conda activate qiime_env
+conda install -c conda-forge -c bioconda qiime
 
 ## Download source code.
 
