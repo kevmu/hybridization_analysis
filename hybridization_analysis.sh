@@ -8,12 +8,19 @@
 #SBATCH --output=run_hybrid_emirge_analysis.%A.out
 #SBATCH --error=run_hybrid_emirge_analysis.%A.err
 
+# Example to get fastq_files_list.txt
+# 16S
+#find /archive/dumonceauxt/230801_M01666_0203_000000000-KTT65_IMPACTTlilacBBSPTWMQhybsEPL/Fastq -type f -name "*.fastq.gz" | grep "16S" | rev | cut -d '/' -f1 | rev | sed 's/_L001_R[1-2]_001.fastq.gz//g' | sort -V | uniq > 16S_fastq_files_list.txt
+
+# cpn60
+#find /archive/dumonceauxt/230801_M01666_0203_000000000-KTT65_IMPACTTlilacBBSPTWMQhybsEPL/Fastq -type f -name "*.fastq.gz" | grep "cpn60" | rev | cut -d '/' -f1 | rev | sed 's/_L001_R[1-2]_001.fastq.gz//g' | sort -V | uniq > cpn60_fastq_files_list.txt
 
 # Get the source ~/.bashrc file so that we can use conda.
 source ~/.bashrc
 
 # The list of fastq filenames.
-fastq_list_file="/home/AGR.GC.CA/muirheadk/hybridization_analysis/fastq_files_list.txt"
+fastq_list_file="/home/AGR.GC.CA/muirheadk/hybridization_analysis/16S_fastq_files_list.txt"
+#fastq_list_file="/home/AGR.GC.CA/muirheadk/hybridization_analysis/cpn60_fastq_files_list.txt"
 
 # The fastq input file directory.
 fastq_input_dir="/archive/dumonceauxt/230801_M01666_0203_000000000-KTT65_IMPACTTlilacBBSPTWMQhybsEPL/Fastq"
@@ -25,6 +32,10 @@ read1_suffix="_L001_R1_001.fastq.gz"
 # The read2 fastq suffix.
 read2_suffix="_L001_R2_001.fastq.gz"
 
+# The hybridization probe type. Either 16S or cpn60. Used for primers for cutadapt.
+hybrid_type="16S"
+#hybrid_type="cpn60"
+
 # The number of cpu threads to use.
 num_threads=40
 
@@ -33,27 +44,27 @@ num_threads=40
 # SILVA databases.
 
 # Emirge silva fasta database.
-emirge_fasta_db="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/emirge_dbs/silva_db/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref.fasta"
+emirge_fasta_db="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/emirge_dbs/silva_db/SILVA_138_SSURef_NR97_tax_silva_trunc.fixed.clustered.emirge.ref.fasta"
 
 # Emirge silva bowtie database.
-emirge_bowtie_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/emirge_dbs/silva_db/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref"
+emirge_bowtie_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/emirge_dbs/silva_db/SILVA_138_SSURef_NR97_tax_silva_trunc.fixed.clustered.emirge.ref"
 
 # Cpn60 UT databases.
 
 # Emirge cpn60 UT fasta database.
-#emirge_fasta_db="/home/AGR.GC.CA/muirheadk/hybridization_analysis/emirge_dbs/cpn60_db/cpn60_all_nut_seq.clustered.emirge.ref.fasta"
+#emirge_fasta_db="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/emirge_dbs/cpn60_db/cpn60_all_nut_seq.clustered.emirge.ref.fasta"
 
 # Emirge cpn60 UT bowtie database.
-#emirge_bowtie_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/emirge_dbs/cpn60_db/cpn60_all_nut_seq.clustered.emirge.ref"
+#emirge_bowtie_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/emirge_dbs/cpn60_db/cpn60_all_nut_seq.clustered.emirge.ref"
 
 ## Bowtie2 database.
 
 # Bowtie2 database index for mapping reads and automatically determining the parameters for emirge.
 
 # The bowtie2 database index.
-bowtie2_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/bowtie2_dbs/SILVA_138_SSURef_NR99_tax_silva_trunc.fixed.clustered.emirge.ref"
+bowtie2_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/bowtie2_dbs/silva_db/SILVA_138_SSURef_NR97_tax_silva_trunc.fixed.clustered.emirge.ref"
 
-#bowtie2_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/bowtie2_dbs/cpn60_db/cpn60_all_nut_seq.clustered.emirge.ref"
+#bowtie2_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/bowtie2_dbs/cpn60_db/cpn60_all_nut_seq.clustered.emirge.ref"
 
 # The base output directory.
 output_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis/16S_analysis_output"
@@ -64,21 +75,40 @@ mkdir -p $output_dir
 preprocessing_output_dir="${output_dir}/preprocessing"
 mkdir -p $preprocessing_output_dir
 
-# The fastq list file of fastq filenames.
-#fastq_list_file="${preprocessing_output_dir}/fastq_files_list.txt"
-
 # The emirge output directory.
 emirge_output_dir="${output_dir}/emirge"
 
 ### Cutadapt program parameters.
 
-# The forward adapter sequence for cutadapt.
-#T7-A 5’-GGATTCTAATACGACTCACTATAGGGATCGCACCAGCGTGT-3’ 
-fwd_adapter="GGATTCTAATACGACTCACTATAGGGATCGCACCAGCGTGT"
+# The hybridization probe primers for cutadapt.
+if [ ${hybrid_type} = "16S" ];
+then
 
-# The reverse adapter sequence for cutadapt.
-#B 5’-CGTGGATGAGGAGCCGCAGTG-3’
-rev_adapter="CGTGGATGAGGAGCCGCAGTG"
+	# The forward adapter sequence for cutadapt.
+	#T7-A 5’-GGATTCTAATACGACTCACTATAGGGATCGCACCAGCGTGT-3’ 
+	fwd_adapter="GGATTCTAATACGACTCACTATAGGGATCGCACCAGCGTGT"
+
+	# The reverse adapter sequence for cutadapt.
+	#B 5’-CGTGGATGAGGAGCCGCAGTG-3’
+	rev_adapter="CGTGGATGAGGAGCCGCAGTG"
+
+elif [  ${hybrid_type} = "cpn60" ];
+then
+
+	# H279 5'-GAIIIIGCIGGIGAYGGIACIACIAC-3'	
+	fwd_adapter_H279="GANNNNGCNGGNGAYGGNACNACNAC"
+
+	# H280 5'-YKIYKITCICCRAAICCIGGIGCYTT-3'
+	rev_adapter_H280="YKNYKNTCNCCRAANCCNGGNGCYTT"
+
+	# H1612 5'-GAIIIIGCIGGYGACGGYACSACSAC-3'
+	fwd_adapter_H1612="GANNNNGCNGGYGACGGYACSACSAC"
+
+	# H1613 5'-CGRCGRTCRCCGAAGCCSGGIGCCTT-3'
+	rev_adapter_H1613="CGRCGRTCRCCGAAGCCSGGNGCCTT"
+
+fi
+
 
 ### Prinseq program parameters.
 
@@ -160,14 +190,25 @@ do
 
     fastq_read1_file="${fastq_input_dir}/${fastq_filename}${read1_suffix}"
     fastq_read2_file="${fastq_input_dir}/${fastq_filename}${read2_suffix}"
-    
-    trimmed_fastq_read1_file="${cutadapt_dir}/${fastq_filename}_trimmed_R1.fastq"
-    trimmed_fastq_read2_file="${cutadapt_dir}/${fastq_filename}_trimmed_R2.fastq"
+   
+    cutadapt_sample_dir="${cutadapt_dir}/${fastq_filename}"
+    mkdir -p $cutadapt_sample_dir
+
+    trimmed_fastq_read1_file="${cutadapt_sample_dir}/${fastq_filename}_trimmed_R1.fastq"
+    trimmed_fastq_read2_file="${cutadapt_sample_dir}/${fastq_filename}_trimmed_R2.fastq"
+
     if [ ! -s $trimmed_fastq_read1_file ] && [ ! -s $trimmed_fastq_read2_file ];
     then
-
+	if [ ${hybrid_type} = "16S" ];
+	then
 	    echo "cutadapt -m ${min_len} --max-n ${ns_max_p} -a ${fwd_adapter} -A ${rev_adapter} -j ${num_threads} -o ${trimmed_fastq_read1_file} -p ${trimmed_fastq_read2_file} ${fastq_read1_file} ${fastq_read2_file}"
 	    cutadapt -m ${min_len} --max-n ${ns_max_p} -a ${fwd_adapter} -A ${rev_adapter} -j ${num_threads} -o ${trimmed_fastq_read1_file} -p ${trimmed_fastq_read2_file} ${fastq_read1_file} ${fastq_read2_file}
+    	elif [ ${hybrid_type} = "cpn60" ];
+	then
+            
+            echo "cutadapt -m ${min_len} --max-n ${ns_max_p} -g ${fwd_adapter_H279} -g ${fwd_adapter_H1612} -a ${rev_adapter_H280} -a ${rev_adapter_H1613} -j ${num_threads} -o ${trimmed_fastq_read1_file} -p ${trimmed_fastq_read2_file} ${fastq_read1_file} ${fastq_read2_file}"
+            cutadapt -m ${min_len} --max-n ${ns_max_p} -g ${fwd_adapter_H279} -g ${fwd_adapter_H1612} -a ${rev_adapter_H280} -a ${rev_adapter_H1613} -j ${num_threads} -o ${trimmed_fastq_read1_file} -p ${trimmed_fastq_read2_file} ${fastq_read1_file} ${fastq_read2_file}
+    	fi
     else
 
         trimmed_fastq_read1_filename=$(basename $trimmed_fastq_read1_file)
@@ -193,9 +234,12 @@ mkdir -p $prinseq_dir
 for fastq_filename in $(cat $fastq_list_file);
 do
     echo "Processing ${fastq_filename}......";
-    
-    trimmed_fastq_read1_file="${cutadapt_dir}/${fastq_filename}_trimmed_R1.fastq"
-    trimmed_fastq_read2_file="${cutadapt_dir}/${fastq_filename}_trimmed_R2.fastq"
+
+    cutadapt_sample_dir="${cutadapt_dir}/${fastq_filename}"
+    mkdir -p $cutadapt_sample_dir
+
+    trimmed_fastq_read1_file="${cutadapt_sample_dir}/${fastq_filename}_trimmed_R1.fastq"
+    trimmed_fastq_read2_file="${cutadapt_sample_dir}/${fastq_filename}_trimmed_R2.fastq"
 
     prinseq_sample_dir="${prinseq_dir}/${fastq_filename}"
     mkdir -p $prinseq_sample_dir
@@ -207,8 +251,8 @@ do
 
     if [ ! -s $filtered_fastq_read1_file ] && [ ! -s $filtered_fastq_read2_file ];    
     then
-        echo "perl software/prinseq-lite-0.20.4/prinseq-lite.pl -fastq ${trimmed_fastq_read1_file} -fastq2 ${trimmed_fastq_read2_file} -out_format 3 -out_good ${fastq_file_prefix} -out_bad null -no_qual_header -min_qual_mean ${min_qual_mean} -ns_max_p ${ns_max_p} -lc_method ${lc_method} -lc_threshold ${lc_threshold} -trim_qual_left ${trim_qual_left} -trim_qual_right ${trim_qual_right} -trim_qual_type ${trim_qual_type} -trim_qual_rule ${trim_qual_rule} -trim_qual_window ${trim_qual_window} -trim_qual_step ${trim_qual_step} -min_len ${min_len} –verbose"
-    	perl software/prinseq-lite-0.20.4/prinseq-lite.pl -fastq ${trimmed_fastq_read1_file} -fastq2 ${trimmed_fastq_read2_file} -out_format 3 -out_good ${fastq_file_prefix} -out_bad null -no_qual_header -min_qual_mean ${min_qual_mean} -ns_max_p ${ns_max_p} -lc_method ${lc_method} -lc_threshold ${lc_threshold} -trim_qual_left ${trim_qual_left} -trim_qual_right ${trim_qual_right} -trim_qual_type ${trim_qual_type} -trim_qual_rule ${trim_qual_rule} -trim_qual_window ${trim_qual_window} -trim_qual_step ${trim_qual_step} -min_len ${min_len} –verbose
+        echo "perl software/prinseq-lite-0.20.4/prinseq-lite.pl -fastq ${trimmed_fastq_read1_file} -fastq2 ${trimmed_fastq_read2_file} -out_format 3 -out_good ${fastq_file_prefix} -out_bad null -no_qual_header -min_qual_mean ${min_qual_mean} -ns_max_p ${ns_max_p} -lc_method ${lc_method} -lc_threshold ${lc_threshold} -trim_qual_left ${trim_qual_left} -trim_qual_right ${trim_qual_right} -trim_qual_type ${trim_qual_type} -trim_qual_rule ${trim_qual_rule} -trim_qual_window ${trim_qual_window} -trim_qual_step ${trim_qual_step} -min_len ${min_len} -verbose"
+    	perl software/prinseq-lite-0.20.4/prinseq-lite.pl -fastq ${trimmed_fastq_read1_file} -fastq2 ${trimmed_fastq_read2_file} -out_format 3 -out_good ${fastq_file_prefix} -out_bad null -no_qual_header -min_qual_mean ${min_qual_mean} -ns_max_p ${ns_max_p} -lc_method ${lc_method} -lc_threshold ${lc_threshold} -trim_qual_left ${trim_qual_left} -trim_qual_right ${trim_qual_right} -trim_qual_type ${trim_qual_type} -trim_qual_rule ${trim_qual_rule} -trim_qual_window ${trim_qual_window} -trim_qual_step ${trim_qual_step} -min_len ${min_len} -verbose
     else
     	filtered_fastq_read1_filename=$(basename $filtered_fastq_read1_file)
     	filtered_fastq_read2_filename=$(basename $filtered_fastq_read2_file)
@@ -228,13 +272,17 @@ for fastq_filename in $(cat $fastq_list_file);
 do
     echo "Processing ${fastq_filename}......";
 
+    prinseq_sample_dir="${prinseq_dir}/${fastq_filename}"
+    mkdir -p $prinseq_sample_dir
+
     filtered_fastq_read1_file="${prinseq_sample_dir}/${fastq_filename}_filtered_1.fastq"
     filtered_fastq_read2_file="${prinseq_sample_dir}/${fastq_filename}_filtered_2.fastq"
         
     insert_size_sam_file="${insert_size_dir}/${fastq_filename}_insert_size.sam"
     insert_size_bam_file="${insert_size_dir}/${fastq_filename}_insert_size.bam"
     insert_size_stats_file="${insert_size_dir}/${fastq_filename}_insert_size_stats.txt"
-    
+
+    # Activate the bowtie2 conda environment. 
     conda activate bowtie2_env
     
     if [ ! -s $insert_size_sam_file ];
@@ -246,6 +294,7 @@ do
         echo "The ${insert_size_sam_filename} file has already been created. Skipping to next set of commands!!!"
     fi
     
+    # Activate the samtools conda environment.
     conda activate samtools_env
     
     if [ ! -s $insert_size_bam_file ];
@@ -276,6 +325,9 @@ for fastq_filename in $(cat $fastq_list_file);
 do
     echo "Processing ${fastq_filename}......";
     
+    prinseq_sample_dir="${prinseq_dir}/${fastq_filename}"
+    mkdir -p $prinseq_sample_dir
+
     filtered_fastq_read1_file="${prinseq_sample_dir}/${fastq_filename}_filtered_1.fastq"
     filtered_fastq_read2_file="${prinseq_sample_dir}/${fastq_filename}_filtered_2.fastq"
  
@@ -315,8 +367,8 @@ do
     if [ ! -s $emirge_fasta_file ];
     then
 
-        echo "emirge.py ${emirge_sample_output_dir} -1 ${filtered_fastq_read1_file} -2 ${filtered_fastq_read2_file} -f ${emirge_fasta_db} -b  ${emirge_bowtie_db_index} -l ${max_read_length} -i ${insert_mean} -s ${insert_stddev} -n ${num_iter} -a ${num_threads} -p  ${snp_fraction_thresh} -v ${variant_fraction_thresh} -j ${join_threshold} -c ${min_depth} --phred33"
-        emirge.py ${emirge_sample_output_dir} -1 ${filtered_fastq_read1_file} -2 ${filtered_fastq_read2_file} -f ${emirge_fasta_db} -b  ${emirge_bowtie_db_index} -l ${max_read_length} -i ${insert_mean} -s ${insert_stddev} -n ${num_iter} -a ${num_threads} -p  ${snp_fraction_thresh} -v ${variant_fraction_thresh} -j ${join_threshold} -c ${min_depth} --phred33
+        echo "emirge.py ${emirge_sample_output_dir} -1 ${filtered_fastq_read1_file} -2 ${filtered_fastq_read2_file} -f ${emirge_fasta_db} -b ${emirge_bowtie_db_index} -l ${max_read_length} -i ${insert_mean} -s ${insert_stddev} -n ${num_iter} -a ${num_threads} -p  ${snp_fraction_thresh} -v ${variant_fraction_thresh} -j ${join_threshold} -c ${min_depth} --phred33"
+        emirge.py ${emirge_sample_output_dir} -1 ${filtered_fastq_read1_file} -2 ${filtered_fastq_read2_file} -f ${emirge_fasta_db} -b ${emirge_bowtie_db_index} -l ${max_read_length} -i ${insert_mean} -s ${insert_stddev} -n ${num_iter} -a ${num_threads} -p  ${snp_fraction_thresh} -v ${variant_fraction_thresh} -j ${join_threshold} -c ${min_depth} --phred33
 
     else
         emirge_fasta_filename=$(basename $emirge_fasta_file)
@@ -348,18 +400,16 @@ do
         mkdir -p ${emirge_sample_output_dir}
 
 	emirge_renamed_file="${emirge_sample_output_dir}/${fastq_filename}_emirge.fasta"
-	
-	chimera_file="${emirge_sample_output_dir}/${fastq_filename}_emirge.chimeras.fasta"
-	nochimeras_file="${emirge_sample_output_dir}/${fastq_filename}_emirge.cleaned.uchime.fasta"
+	taxonomy_best_hits_file="${emirge_sample_output_dir}/${fastq_filename}_vsearch_taxonomy_best_hits.tsv"
+	taxonomy_raw_hits_file="${emirge_sample_output_dir}/${fastq_filename}_vsearch_taxonomy_raw.tsv"
+
+	vsearch_tax_log_file="${emirge_sample_output_dir}/${fastq_filename}_vsearch_tax_log.txt"
 
 	# Filtering chimeras.
 	conda activate vsearch_env
-
-	echo "vsearch --uchime_ref ${emirge_renamed_file} --db ${emirge_fasta_db} --chimeras ${chimeras_file} --nonchimeras ${nochimeras_file} --borderline ${borderline_file} --uchimeout ${uchimeout_file}"
-	vsearch --uchime_ref ${emirge_renamed_file} --db ${emirge_fasta_db} --chimeras ${chimeras_file} --nonchimeras ${nochimeras_file} --borderline ${borderline_file} --uchimeout ${uchimeout_file}
 	
-	conda activate qiime2_env
-	
-
+	echo "vsearch --usearch_global ${emirge_renamed_file} --db ${emirge_fasta_db} --notrunclabels --userout ${taxonomy_best_hits_file} --userfields query+target+id --uc ${taxonomy_raw_hits_file} --id 0.97 --iddef 0 --log ${vsearch_tax_log_file} --threads ${num_threads} --uc_allhits --maxaccepts 30 --top_hits_only --strand both --gapopen '*'"
+	vsearch --usearch_global ${emirge_renamed_file} --db ${emirge_fasta_db} --notrunclabels --userout ${taxonomy_best_hits_file} --userfields query+target+id --uc ${taxonomy_raw_hits_file} --id 0.97 --iddef 0 --log ${vsearch_tax_log_file} --threads ${num_threads} --uc_allhits --maxaccepts 30 --top_hits_only --strand both --gapopen '*'
 
 done
+
