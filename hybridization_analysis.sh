@@ -405,7 +405,6 @@ do
 
 	vsearch_tax_log_file="${emirge_sample_output_dir}/${fastq_filename}_vsearch_tax_log.txt"
 
-	# Filtering chimeras.
 	conda activate vsearch_env
 	
 	echo "vsearch --usearch_global ${emirge_renamed_file} --db ${emirge_fasta_db} --notrunclabels --userout ${taxonomy_best_hits_file} --userfields query+target+id --uc ${taxonomy_raw_hits_file} --id 0.97 --iddef 0 --log ${vsearch_tax_log_file} --threads ${num_threads} --uc_allhits --maxaccepts 30 --top_hits_only --strand both --gapopen '*'"
