@@ -147,6 +147,9 @@ wget "https://data.gtdb.ecogenomic.org/releases/release220/220.0/genomic_files_r
 echo "gunzip -c ${compressed_vsearch_gtdb} > ${vsearch_gtdb_fasta}"
 gunzip -c ${compressed_vsearch_gtdb} > ${vsearch_gtdb_fasta}
 
+# Activate the cd-hit conda environment.
+conda activate cd_hit_env
+
 clustered_vsearch_gtdb_fasta="${vsearch_gtdb_dir}/gtdb_bac120_ssu_reps_r220_vsearch.fasta"
 
 echo "cd-hit -i ${vsearch_gtdb_fasta} -c 1.0 -d 3000 -M 5000 -T ${num_threads} -o ${clustered_vsearch_gtdb_fasta}"
