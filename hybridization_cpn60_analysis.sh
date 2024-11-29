@@ -21,7 +21,6 @@ fastq_list_file="/home/AGR.GC.CA/muirheadk/hybridization_analysis/cpn60_fastq_fi
 
 # The fastq input file directory.
 fastq_input_dir="/archive/dumonceauxt/230801_M01666_0203_000000000-KTT65_IMPACTTlilacBBSPTWMQhybsEPL/Fastq"
-#fastq_input_dir="/home/AGR.GC.CA/muirheadk/hybridization_datasets/cpn60"
 
 # The read1 fastq suffix.
 read1_suffix="_L001_R1_001.fastq.gz"
@@ -37,10 +36,12 @@ num_threads=40
 # cpn60 UT databases.
 
 # Emirge cpn60 UT fasta database.
-emirge_fasta_db="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/emirge_dbs/cpn60_db/cpn60_all_nut_seq.clustered.emirge.ref.fasta"
+#emirge_fasta_db="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/emirge_dbs/cpn60_db/cpn60_all_nut_seq.clustered.emirge.ref.fasta"
+emirge_fasta_db="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/emirge_dbs/cpn60_db/cpn60_all_nut_seq.clustered.97.emirge.ref.fasta"
 
 # Emirge cpn60 UT bowtie database.
-emirge_bowtie_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/emirge_dbs/cpn60_db/cpn60_all_nut_seq.clustered.emirge.ref"
+#emirge_bowtie_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/emirge_dbs/cpn60_db/cpn60_all_nut_seq.clustered.emirge.ref"
+emirge_bowtie_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/emirge_dbs/cpn60_db/cpn60_all_nut_seq.clustered.97.emirge.ref"
 
 ## Bowtie2 database.
 
