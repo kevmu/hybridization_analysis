@@ -49,7 +49,8 @@ emirge_bowtie_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databas
 
 # The bowtie2 database index.
 
-bowtie2_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/bowtie2_dbs/cpn60_db/cpn60_all_nut_seq.clustered.emirge.ref"
+#bowtie2_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/bowtie2_dbs/cpn60_db/cpn60_all_nut_seq.clustered.emirge.ref"
+bowtie2_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/bowtie2_dbs/cpn60_db/cpn60_all_nut_seq.clustered.97.emirge.ref"
 
 # The base output directory.
 output_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis/cpn60_analysis_output"

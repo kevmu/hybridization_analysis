@@ -19,7 +19,6 @@ emirge_scripts_dir="$HOME/hybridization_analysis/software/EMIRGE"
 
 # The number of threads to use in cd-hit.
 num_threads=8
-bowtie2_dbs  emirge_dbs  vsearch_gtdb
 
 emirge_cpn60_db_dir="${db_dir}/emirge_dbs/cpn60_db"
 mkdir -p $emirge_cpn60_db_dir
@@ -50,8 +49,8 @@ emirge_cpn60_db_prefix="${emirge_cpn60_db_dir}/cpn60_all_nut_seq.clustered.97.em
 #if [ ! -s $emirge_cpn60_db_fasta ];
 #then
 
-echo "bowtie2-build ${clustered_cpn60_db_fasta} ${emirge_cpn60_db_prefix}"
-bowtie2-build ${clustered_cpn60_db_fasta} ${emirge_cpn60_db_prefix}
+echo "bowtie-build ${clustered_cpn60_db_fasta} ${emirge_cpn60_db_prefix}"
+bowtie-build ${clustered_cpn60_db_fasta} ${emirge_cpn60_db_prefix}
 
 #else
 #	emirge_cpn60_db_fasta_filename=$(basename $emirge_cpn60_db_fasta)
@@ -62,7 +61,13 @@ bowtie2-build ${clustered_cpn60_db_fasta} ${emirge_cpn60_db_prefix}
 bowtie2_cpn60_db_dir="${db_dir}/bowtie2_dbs/cpn60_db"
 mkdir -p $bowtie2_cpn60_db_dir
 
-cp ${emirge_cpn60_db_prefix}* $bowtie2_cpn60_db_dir
+
+bowtie2_cpn60_db_prefix="${bowtie2_cpn60_db_dir}/cpn60_all_nut_seq.clustered.97.emirge.ref"
+
+echo "bowtie2-build ${clustered_cpn60_db_fasta} ${bowtie2_cpn60_db_prefix}"
+bowtie2-build ${clustered_cpn60_db_fasta} ${bowtie2_cpn60_db_prefix}
+
+cp $clustered_cpn60_db_fasta 
 
 vsearch_cpn60_db_dir="${db_dir}/vsearch_dbs/cpn60_db"
 mkdir -p $vsearch_cpn60_db_dir
