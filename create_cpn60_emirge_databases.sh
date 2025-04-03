@@ -8,14 +8,20 @@
 #SBATCH --output=run_create_emirge_databases.%A.out
 #SBATCH --error=run_create_emirge_databases.%A.err
 
-source ~/.bashrc
+#source ~/.bashrc
+source ~/.bash_profile
 
 # The cpn60 input fasta file.
-cpn60_db_fasta="/home/AGR.GC.CA/muirheadk/hybridization_analysis/cpn60_all_nut_seq.txt"
+#cpn60_db_fasta="/home/AGR.GC.CA/muirheadk/hybridization_analysis/cpn60_all_nut_seq.txt"
+cpn60_db_fasta="/home/kevin.muirhead/capture_seq_cpn60/cpn60_all_nut_seq.txt"
 
-db_dir="$HOME/hybridization_analysis/databases"
+# The database directory.
+#db_dir="$HOME/hybridization_analysis/databases"
+db_dir="/home/kevin.muirhead/capture_seq_cpn60/hybridization_analysis/databases"
 
-emirge_scripts_dir="$HOME/hybridization_analysis/software/EMIRGE"
+# The EMIRGE scripts directory dependency.
+#emirge_scripts_dir="$HOME/hybridization_analysis/software/EMIRGE"
+emirge_scripts_dir="/home/kevin.muirhead/capture_seq_cpn60/hybridization_analysis/software/EMIRGE"
 
 # The number of threads to use in cd-hit.
 num_threads=8
@@ -41,7 +47,6 @@ fi
 # Activate the emirge conda environment.
 conda activate emirge_env
 
-
 emirge_cpn60_db_prefix="${emirge_cpn60_db_dir}/cpn60_all_nut_seq.clustered.97.emirge.ref"
 ##find /bulk/sycuro_bulk/lsycuro_labshare/kevin/testing/hybridization_analysis/dbs/emirge_db/cpn60_db -type f -name "*.bt2"
 
@@ -61,13 +66,15 @@ bowtie-build ${clustered_cpn60_db_fasta} ${emirge_cpn60_db_prefix}
 bowtie2_cpn60_db_dir="${db_dir}/bowtie2_dbs/cpn60_db"
 mkdir -p $bowtie2_cpn60_db_dir
 
-
 bowtie2_cpn60_db_prefix="${bowtie2_cpn60_db_dir}/cpn60_all_nut_seq.clustered.97.emirge.ref"
+
+# Activate the bowtie2 conda environment.
+conda activate bowtie2_env
 
 echo "bowtie2-build ${clustered_cpn60_db_fasta} ${bowtie2_cpn60_db_prefix}"
 bowtie2-build ${clustered_cpn60_db_fasta} ${bowtie2_cpn60_db_prefix}
 
-cp $clustered_cpn60_db_fasta 
+#cp $clustered_cpn60_db_fasta 
 
 vsearch_cpn60_db_dir="${db_dir}/vsearch_dbs/cpn60_db"
 mkdir -p $vsearch_cpn60_db_dir

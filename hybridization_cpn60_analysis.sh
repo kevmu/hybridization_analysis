@@ -14,19 +14,24 @@
 #find /archive/dumonceauxt/230801_M01666_0203_000000000-KTT65_IMPACTTlilacBBSPTWMQhybsEPL/Fastq -type f -name "*.fastq.gz" | grep "cpn60" | rev | cut -d '/' -f1 | rev | sed 's/_L001_R[1-2]_001.fastq.gz//g' | sort -V | uniq > cpn60_fastq_files_list.txt
 
 # Get the source ~/.bashrc file so that we can use conda.
-source ~/.bashrc
+#source ~/.bashrc
+source ~/.bash_profile
 
 # The list of fastq filenames.
-fastq_list_file="/home/AGR.GC.CA/muirheadk/hybridization_analysis/cpn60_fastq_files_list.txt"
+#fastq_list_file="/home/AGR.GC.CA/muirheadk/hybridization_analysis/cpn60_fastq_files_list.txt"
+fastq_list_file="/home/kevin.muirhead/capture_seq_cpn60/cpn60UT_captureseq_sample_ids.txt"
 
 # The fastq input file directory.
-fastq_input_dir="/archive/dumonceauxt/230801_M01666_0203_000000000-KTT65_IMPACTTlilacBBSPTWMQhybsEPL/Fastq"
+#fastq_input_dir="/archive/dumonceauxt/230801_M01666_0203_000000000-KTT65_IMPACTTlilacBBSPTWMQhybsEPL/Fastq"
+fastq_input_dir="/home/kevin.muirhead/capture_seq_cpn60/renamed_fastq_files"
 
 # The read1 fastq suffix.
-read1_suffix="_L001_R1_001.fastq.gz"
+#read1_suffix="_L001_R1_001.fastq.gz"
+read1_suffix="_1.fastq"
 
 # The read2 fastq suffix.
-read2_suffix="_L001_R2_001.fastq.gz"
+#read2_suffix="_L001_R2_001.fastq.gz"
+read2_suffix="_2.fastq"
 
 # The number of cpu threads to use.
 num_threads=40
@@ -37,11 +42,11 @@ num_threads=40
 
 # Emirge cpn60 UT fasta database.
 #emirge_fasta_db="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/emirge_dbs/cpn60_db/cpn60_all_nut_seq.clustered.emirge.ref.fasta"
-emirge_fasta_db="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/emirge_dbs/cpn60_db/cpn60_all_nut_seq.clustered.97.emirge.ref.fasta"
+emirge_fasta_db="/home/kevin.muirhead/capture_seq_cpn60/hybridization_analysis/databases/emirge_dbs/cpn60_db/cpn60_all_nut_seq.clustered.97.emirge.ref.fasta"
 
 # Emirge cpn60 UT bowtie database.
 #emirge_bowtie_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/emirge_dbs/cpn60_db/cpn60_all_nut_seq.clustered.emirge.ref"
-emirge_bowtie_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/emirge_dbs/cpn60_db/cpn60_all_nut_seq.clustered.97.emirge.ref"
+emirge_bowtie_db_index="/home/kevin.muirhead/capture_seq_cpn60/hybridization_analysis/databases/emirge_dbs/cpn60_db/cpn60_all_nut_seq.clustered.97.emirge.ref"
 
 ## Bowtie2 database.
 
@@ -50,10 +55,10 @@ emirge_bowtie_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databas
 # The bowtie2 database index.
 
 #bowtie2_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/bowtie2_dbs/cpn60_db/cpn60_all_nut_seq.clustered.emirge.ref"
-bowtie2_db_index="/home/AGR.GC.CA/muirheadk/hybridization_analysis/databases/bowtie2_dbs/cpn60_db/cpn60_all_nut_seq.clustered.97.emirge.ref"
+bowtie2_db_index="/home/kevin.muirhead/capture_seq_cpn60/hybridization_analysis/databases/bowtie2_dbs/cpn60_db/cpn60_all_nut_seq.clustered.97.emirge.ref"
 
 # The base output directory.
-output_dir="/home/AGR.GC.CA/muirheadk/hybridization_analysis/cpn60_analysis_output"
+output_dir="/home/kevin.muirhead/capture_seq_cpn60/cpn60UT_captureseq_output"
 mkdir -p $output_dir
 
 # The preprocessing output directory.
@@ -151,38 +156,38 @@ min_depth=3
 conda activate cutadapt_env
 
 # Make the cutadapt output directory.
-cutadapt_dir="${preprocessing_output_dir}/cutadapt"
-mkdir -p $cutadapt_dir
+#cutadapt_dir="${preprocessing_output_dir}/cutadapt"
+#mkdir -p $cutadapt_dir
 
-for fastq_filename in $(cat $fastq_list_file);
-do
-    echo "Processing ${fastq_filename}......";
-
-    fastq_read1_file="${fastq_input_dir}/${fastq_filename}${read1_suffix}"
-    fastq_read2_file="${fastq_input_dir}/${fastq_filename}${read2_suffix}"
-   
-    cutadapt_sample_dir="${cutadapt_dir}/${fastq_filename}"
-    mkdir -p $cutadapt_sample_dir
-
-    trimmed_fastq_read1_file="${cutadapt_sample_dir}/${fastq_filename}_trimmed_R1.fastq"
-    trimmed_fastq_read2_file="${cutadapt_sample_dir}/${fastq_filename}_trimmed_R2.fastq"
-
-    if [ ! -s $trimmed_fastq_read1_file ] && [ ! -s $trimmed_fastq_read2_file ];
-    then
-        echo "cutadapt -m ${min_len} --max-n ${ns_max_p} -g ${fwd_adapter_H279} -g ${fwd_adapter_H1612} -a ${rev_adapter_H280} -a ${rev_adapter_H1613} -j ${num_threads} -o ${trimmed_fastq_read1_file} -p ${trimmed_fastq_read2_file} ${fastq_read1_file} ${fastq_read2_file}"
-        cutadapt -m ${min_len} --max-n ${ns_max_p} -g ${fwd_adapter_H279} -g ${fwd_adapter_H1612} -a ${rev_adapter_H280} -a ${rev_adapter_H1613} -j ${num_threads} -o ${trimmed_fastq_read1_file} -p ${trimmed_fastq_read2_file} ${fastq_read1_file} ${fastq_read2_file}
-    else
-
-        trimmed_fastq_read1_filename=$(basename $trimmed_fastq_read1_file)
-        trimmed_fastq_read2_filename=$(basename $trimmed_fastq_read2_file)
-        echo "The following files have already been created."
-        echo "${trimmed_fastq_read1_filename}"
-        echo "${trimmed_fastq_read2_filename}"
-        echo "Skipping to next set of commands!!!"
-
-    fi
-
-done
+#for fastq_filename in $(cat $fastq_list_file);
+#do
+#    echo "Processing ${fastq_filename}......";
+#
+#    fastq_read1_file="${fastq_input_dir}/${fastq_filename}${read1_suffix}"
+#    fastq_read2_file="${fastq_input_dir}/${fastq_filename}${read2_suffix}"
+#   
+#    cutadapt_sample_dir="${cutadapt_dir}/${fastq_filename}"
+#    mkdir -p $cutadapt_sample_dir
+#
+#    trimmed_fastq_read1_file="${cutadapt_sample_dir}/${fastq_filename}_trimmed_R1.fastq"
+#    trimmed_fastq_read2_file="${cutadapt_sample_dir}/${fastq_filename}_trimmed_R2.fastq"
+#
+#    if [ ! -s $trimmed_fastq_read1_file ] && [ ! -s $trimmed_fastq_read2_file ];
+#    then
+#        echo "cutadapt -m ${min_len} --max-n ${ns_max_p} -g ${fwd_adapter_H279} -g ${fwd_adapter_H1612} -a ${rev_adapter_H280} -a ${rev_adapter_H1613} -j ${num_threads} -o ${trimmed_fastq_read1_file} -p ${trimmed_fastq_read2_file} ${fastq_read1_file} ${fastq_read2_file}"
+#        cutadapt -m ${min_len} --max-n ${ns_max_p} -g ${fwd_adapter_H279} -g ${fwd_adapter_H1612} -a ${rev_adapter_H280} -a ${rev_adapter_H1613} -j ${num_threads} -o ${trimmed_fastq_read1_file} -p ${trimmed_fastq_read2_file} ${fastq_read1_file} ${fastq_read2_file}
+#    else
+#
+#        trimmed_fastq_read1_filename=$(basename $trimmed_fastq_read1_file)
+#        trimmed_fastq_read2_filename=$(basename $trimmed_fastq_read2_file)
+#        echo "The following files have already been created."
+#        echo "${trimmed_fastq_read1_filename}"
+#        echo "${trimmed_fastq_read2_filename}"
+#        echo "Skipping to next set of commands!!!"
+#
+#    fi
+#
+#done
 
 ### Prinseq 
 
@@ -197,11 +202,14 @@ for fastq_filename in $(cat $fastq_list_file);
 do
     echo "Processing ${fastq_filename}......";
 
-    cutadapt_sample_dir="${cutadapt_dir}/${fastq_filename}"
-    mkdir -p $cutadapt_sample_dir
+    fastq_read1_file="${fastq_input_dir}/${fastq_filename}${read1_suffix}"
+    fastq_read2_file="${fastq_input_dir}/${fastq_filename}${read2_suffix}"
 
-    trimmed_fastq_read1_file="${cutadapt_sample_dir}/${fastq_filename}_trimmed_R1.fastq"
-    trimmed_fastq_read2_file="${cutadapt_sample_dir}/${fastq_filename}_trimmed_R2.fastq"
+#    cutadapt_sample_dir="${cutadapt_dir}/${fastq_filename}"
+#    mkdir -p $cutadapt_sample_dir
+#
+#    trimmed_fastq_read1_file="${cutadapt_sample_dir}/${fastq_filename}_trimmed_R1.fastq"
+#    trimmed_fastq_read2_file="${cutadapt_sample_dir}/${fastq_filename}_trimmed_R2.fastq"
 
     prinseq_sample_dir="${prinseq_dir}/${fastq_filename}"
     mkdir -p $prinseq_sample_dir
@@ -213,8 +221,10 @@ do
 
     if [ ! -s $filtered_fastq_read1_file ] && [ ! -s $filtered_fastq_read2_file ];    
     then
-        echo "perl software/prinseq-lite-0.20.4/prinseq-lite.pl -fastq ${trimmed_fastq_read1_file} -fastq2 ${trimmed_fastq_read2_file} -out_format 3 -out_good ${fastq_file_prefix} -out_bad null -no_qual_header -min_qual_mean ${min_qual_mean} -ns_max_p ${ns_max_p} -lc_method ${lc_method} -lc_threshold ${lc_threshold} -trim_qual_left ${trim_qual_left} -trim_qual_right ${trim_qual_right} -trim_qual_type ${trim_qual_type} -trim_qual_rule ${trim_qual_rule} -trim_qual_window ${trim_qual_window} -trim_qual_step ${trim_qual_step} -min_len ${min_len} -verbose"
-    	perl software/prinseq-lite-0.20.4/prinseq-lite.pl -fastq ${trimmed_fastq_read1_file} -fastq2 ${trimmed_fastq_read2_file} -out_format 3 -out_good ${fastq_file_prefix} -out_bad null -no_qual_header -min_qual_mean ${min_qual_mean} -ns_max_p ${ns_max_p} -lc_method ${lc_method} -lc_threshold ${lc_threshold} -trim_qual_left ${trim_qual_left} -trim_qual_right ${trim_qual_right} -trim_qual_type ${trim_qual_type} -trim_qual_rule ${trim_qual_rule} -trim_qual_window ${trim_qual_window} -trim_qual_step ${trim_qual_step} -min_len ${min_len} -verbose
+#        echo "perl software/prinseq-lite-0.20.4/prinseq-lite.pl -fastq ${trimmed_fastq_read1_file} -fastq2 ${trimmed_fastq_read2_file} -out_format 3 -out_good ${fastq_file_prefix} -out_bad null -no_qual_header -min_qual_mean ${min_qual_mean} -ns_max_p ${ns_max_p} -lc_method ${lc_method} -lc_threshold ${lc_threshold} -trim_qual_left ${trim_qual_left} -trim_qual_right ${trim_qual_right} -trim_qual_type ${trim_qual_type} -trim_qual_rule ${trim_qual_rule} -trim_qual_window ${trim_qual_window} -trim_qual_step ${trim_qual_step} -min_len ${min_len} -verbose"
+#    	perl software/prinseq-lite-0.20.4/prinseq-lite.pl -fastq ${trimmed_fastq_read1_file} -fastq2 ${trimmed_fastq_read2_file} -out_format 3 -out_good ${fastq_file_prefix} -out_bad null -no_qual_header -min_qual_mean ${min_qual_mean} -ns_max_p ${ns_max_p} -lc_method ${lc_method} -lc_threshold ${lc_threshold} -trim_qual_left ${trim_qual_left} -trim_qual_right ${trim_qual_right} -trim_qual_type ${trim_qual_type} -trim_qual_rule ${trim_qual_rule} -trim_qual_window ${trim_qual_window} -trim_qual_step ${trim_qual_step} -min_len ${min_len} -verbose
+	perl software/prinseq-lite-0.20.4/prinseq-lite.pl -fastq ${fastq_read1_file} -fastq2 ${fastq_read2_file} -out_format 3 -out_good ${fastq_file_prefix} -out_bad null -no_qual_header -min_qual_mean ${min_qual_mean} -ns_max_p ${ns_max_p} -lc_method ${lc_method} -lc_threshold ${lc_threshold} -trim_qual_left ${trim_qual_left} -trim_qual_right ${trim_qual_right} -trim_qual_type ${trim_qual_type} -trim_qual_rule ${trim_qual_rule} -trim_qual_window ${trim_qual_window} -trim_qual_step ${trim_qual_step} -min_len ${min_len} -verbose
+
     else
     	filtered_fastq_read1_filename=$(basename $filtered_fastq_read1_file)
     	filtered_fastq_read2_filename=$(basename $filtered_fastq_read2_file)

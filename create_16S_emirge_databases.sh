@@ -123,6 +123,9 @@ bowtie2_silva_db_prefix="${bowtie2_silva_db_dir}/SILVA_138_SSURef_NR97_tax_silva
 echo "cp ${emirge_silva_db_fasta} ${bowtie2_silva_db_fasta}"
 cp ${emirge_silva_db_fasta} ${bowtie2_silva_db_fasta}
 
+# Activate the bowtie2 conda environment.
+conda activate bowtie2_env
+
 # I NEED TO ADD THE IF STATEMENT S^?FOR THE BOWTIE DATABASE EXTENSION FILES
 #if [ ! -s $emirge_silva_db_fasta ];
 #then
